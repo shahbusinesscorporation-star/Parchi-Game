@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Custom Parchi Game</title>
+  <script src="/socket.io/socket.io.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; background: #f0f2f5; padding: 20px; }
+    .card-box { display: inline-block; padding: 15px 25px; margin: 10px; background: white; border: 2px solid #333; border-radius: 8px; cursor: pointer; font-weight: bold; }
+    .hidden { display: none; }
+    .btn { padding: 10px 20px; background: #28a745; color: white; border: none; cursor: pointer; border-radius: 5px; margin-top: 10px; font-size: 16px; }
+    input { padding: 8px; margin: 5px; border-radius: 4px; border: 1px solid #ccc; }
+  </style>
+</head>
+<body>
+
+  <h1>📜 Multiplayer Parchi Game</h1>
+
+  <div id="auth-screen">
+    <h2>1. Create Room</h2>
+    <input type="text" id="host-name" placeholder="Apna Name Likhein"><br><br>
+    <input type="text" class="custom-name" placeholder="Parchi 1 (e.g. Raja)">
+    <input type="text" class="custom-name" placeholder="Parchi 2 (e.g. Mantri)"><br>
+    <input type="text" class="custom-name" placeholder="Parchi 3 (e.g. Chor)">
+    <input type="text" class="custom-name" placeholder="Parchi 4 (e.g. Sipahi)"><br>
+    <button class="btn" onclick="createRoom()">Create Room</button>
+
+    <hr style="margin: 30px 0;">
+
+    <h2>2. Join Room</h2>
+    <input type="text" id="player-name" placeholder="Apna Name Likhein"><br><br>
+    <input type="text" id="room-code-input" placeholder="Room Code Enter Karein"><br>
+    <button class="btn" style="background:#007bff;" onclick="joinRoom()">Join Game</button>
+  </div>
+
+  <div id="game-screen" class="hidden">
+    <h2 id="room-display"></h2>
+    <h3 id="status-msg">Players Waiting...</h3>
+    <ul id="players-list" style="list-style: none; padding: 0;"></ul>
+
+    <div id="hand-container">
+      <h3>Aapki Parchiyan:</h3>
+      <div id="parchiyan-list"></div>
+    </div>
+  </div>
+
+  <script>
+    const socket = io();
+    let myRoomId = null;
+
+    function createRoom() {
+      const hostName = document.getElementById('host-name').value;
+      const inputs = document.querySelectorAll('.custom-name');
+      const customNames = Array.from(inputs).map(i => i.value.trim()).filter(Boolean);
+
+      if (!hostName || customNames.length !== 4) {
+        alert("Apna naam aur 4 parchiyan zaroor bharein!");
+        return;
+      }
+
+      socket.emit('createRoom', { hostName, customNames });
+    }
+
+    function joinRoom() {
+      const playerName = document.getElementById('player-name').value;
+      const roomId = document.getElementById('room-code-input').value.toUpperCase();
+
+      if (!playerName || !roomId) {
+        alert("Naam aur Room Code bharein!");
+        return;
+      }
+      // Double click / Multiple fires ko rokne ke liye button disable karo
+      event.target.disabled = true;
+
+      socket.emit('joinRoom', { playerName, roomId });
+    }
+
+    socket.on('roomCreated', ({ roomId, players }) => {
+      myRoomId = roomId;
+      showGameScreen(roomId, players);
+    });
+    // Purane dublicate triggers ko hatane ke liye
+    socket.off('updateplayers');
+    socket.off('gameStateUPdate');
+
+    socket.on('updatePlayers', (players) => {
+      updatePlayersUI(players);
+    });
+
+    socket.on('gameStateUpdate', (room) => {
+      myRoomId = room.roomId;
+      showGameScreen(room.roomId, room.players);
+
+      const me = room.players.find(p => p.id === socket.id);
+      const isMyTurn = room.players[room.currentTurnIndex].id === socket.id;
+
+      document.getElementById('status-msg').innerText = isMyTurn 
+        ? "🟢 Aapki Turn Hai! Parchi par click karke next player ko pass karein." 
+        : `⏳ Waiting for ${room.players[room.currentTurnIndex].name} to pass...`;
+
+      const parchiDiv = document.getElementById('parchiyan-list');
+      parchiDiv.innerHTML = '';
+
+      me.parchiyan.forEach((parchi, index) => {
+        const card = document.createElement('div');
+        card.className = 'card-box';
+        card.innerText = parchi.name;
+        
+        if (isMyTurn && me.parchiyan.length >= 4) {
+          card.onclick = () => socket.emit('passParchi', { roomId: myRoomId, parchiIndex: index });
+        } else {
+          card.style.opacity = '0.5';
+          card.style.cursor = 'not-allowed';
+        }
+        parchiDiv.appendChild(card);
+      });
+    });
+
+    socket.on('gameOver', ({ winnerName, parchiName }) => {
+      alert(`🎉 GAME OVER! ${winnerName} jeet gaya! Unke paas charo ${parchiName} ho gayi hain!`);
+    });
+
+    socket.on('errorMsg', (msg) => alert(msg));
+
+    function showGameScreen(roomId, players) {
+      document.getElementById('auth-screen').classList.add('hidden');
+      document.getElementById('game-screen').classList.remove('hidden');
+      document.getElementById('room-display').innerText = `Room Code: ${roomId}`;
+      updatePlayersUI(players);
+    }
+
+    function updatePlayersUI(players) {
+      const list = document.getElementById('players-list');
+      list.innerHTML = players.map(p => `<li>👤 ${p.name} (${p.parchiyan.length} parchiyan)</li>`).join('');
+    }
+  </script>
+</body>
+</html>
