@@ -6,12 +6,21 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-// ✅ Isse badal kar yeh kar dein:
+const express = require('express');
+const http = require('http');
+const { Server } = require('socket.io');
 const path = require('path');
-app.use(express.static(path.join(__dirname, 'public')));
 
+const app = express();
+const server = http.createServer(app);
+const io = new Server(server);
+
+// Static files serve karein root folder se
+app.use(express.static(__dirname));
+
+// Root URL par index.html bhejein
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 const rooms = {};
