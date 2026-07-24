@@ -191,7 +191,37 @@
         });
 
         socket.on('errorMsg', (msg) => alert(msg));
-        socket.on('gameOver', (data) => alert(data.message));
+        // Restart Function
+        function restartGame() {
+            socket.emit('restartGame', { roomId: myRoomId });
+        }
+
+        // Updated Game Over Event
+        socket.on('gameOver', (data) => {
+            document.getElementById('cardsArea').style.display = 'none';
+            document.getElementById('turnBanner').style.display = 'none';
+            document.getElementById('thapBtn').style.display = 'none';
+
+            // Play Again Button Show Karein
+            const startBtn = document.getElementById('startBtn');
+            startBtn.innerText = '🔄 Play Again (Same Room)';
+            startBtn.setAttribute('onclick', 'restartGame()');
+            startBtn.style.display = 'inline-block';
+
+            alert(`🏆 GAME OVER 🏆\n\n${data.message}`);
+        });
+
+        // Game Restart Event
+        socket.on('gameRestarted', (data) => {
+            document.getElementById('startBtn').style.display = 'none';
+            document.getElementById('cardsArea').style.display = 'block';
+            document.getElementById('thapBtn').style.display = 'block';
+            
+            isMyTurn = (data.activePlayer === myUsername);
+            const banner = document.getElementById('turnBanner');
+            banner.style.display = 'block';
+            banner.innerText = isMyTurn ? "👉 AAPKI TURN HAI! Ek parchi pass karein." : `⏳ Turn: ${data.activePlayer} ki hai...`;
+        });
     </script>
 </body>
 </html>
