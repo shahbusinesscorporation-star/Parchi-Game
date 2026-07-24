@@ -15,6 +15,12 @@
 <body>
 
   <h1>📜 Multiplayer Parchi Game</h1>
+  <!-- Notification Box & THAP Button -->
+<div id="notification-box" style="display: none; position: fixed; top: 20px; right: 20px; background: #2ed573; color: white; padding: 12px 20px; border-radius: 8px; font-weight: bold; z-index: 1000;"></div>
+
+<button id="thapBtn" onclick="triggerThapWin()" style="display: none; background: #ff4757; color: white; font-size: 22px; font-weight: bold; padding: 15px 35px; border: none; border-radius: 50px; cursor: pointer; box-shadow: 0 4px 15px rgba(255, 71, 87, 0.5); margin: 20px auto;">
+    🔥 THAP!
+</button>
 
   <div id="auth-screen">
     <h2>1. Create Room</h2>
@@ -133,6 +139,54 @@
       const list = document.getElementById('players-list');
       list.innerHTML = players.map(p => `<li>👤 ${p.name} (${p.parchiyan.length} parchiyan)</li>`).join('');
     }
+    // --- 1. Notification & Join Sound ---
+socket.on('notification', (msg) => {
+    const sound = document.getElementById('joinSound');
+    if (sound) sound.play().catch(() => {});
+    
+    const box = document.getElementById('notification-box');
+    if (box) {
+        box.innerText = msg;
+        box.style.display = 'block';
+        setTimeout(() => { box.style.display = 'none'; }, 3000);
+    }
+});
+
+// --- 2. 4 Cards Match & THAP Button Logic ---
+function checkMatchingCards(myCards) {
+    if (myCards && myCards.length === 4) {
+        const allEqual = myCards.every(card => card === myCards[0]);
+        const thapBtn = document.getElementById('thapBtn');
+        if (thapBtn) {
+            thapBtn.style.display = allEqual ? "block" : "none";
+        }
+    }
+}
+
+function triggerThapWin() {
+    const currentRoomId = document.getElementById('room-display')?.innerText;
+    socket.emit('claimThapWin', { roomId: currentRoomId, username: "Player" });
+}
+
+socket.on('gameOver', ({ winner, message }) => {
+    const sound = document.getElementById('thapSound');
+    if (sound) sound.play().catch(() => {});
+    alert(`🎉 ${message}`);
+});
+
+// --- 3. WebRTC Voice Chat Setup ---
+navigator.mediaDevices?.getUserMedia({ audio: true, video: false })
+    .then(stream => {
+        socket.on('voiceSignal', (data) => {
+            // WebRTC Signaling handle karne ke liye
+            console.log("Voice signal received", data);
+        });
+    })
+    .catch(err => console.log("Mic access error or denied:", err));
   </script>
+  <!-- WebRTC Remote Audio Container & Sound Effects -->
+<div id="remoteAudioContainer" style="display:none;"></div>
+<audio id="thapSound" src="sounds/thap_win.mp3" preload="auto"></audio>
+<audio id="joinSound" src="sounds/player_join.mp3" preload="auto"></audio>
 </body>
 </html>

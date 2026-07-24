@@ -6,12 +6,40 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-app.use(express.static(__dirname));
+// ✅ Isse badal kar yeh kar dein:
+const path = require('path');
+app.use(express.static(path.join(__dirname, 'public')));
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 const rooms = {};
 
 io.on('connection', (socket) => {
   console.log('Player connected:', socket.id);
+  // === NEW FEATURES SETUP ===
+    // 1. Join Room Notification
+    socket.on('joinRoomNotification', ({ roomId, username }) => {
+        socket.to(roomId).emit('notification', `${username} room me aagaye hain!`);
+    });
+
+    // 2. THAP Winner Broadcast
+    socket.on('claimThapWin', ({ roomId, username }) => {
+        io.in(roomId).emit('gameOver', { 
+            winner: username, 
+            message: `${username} ne THAP maar ke game jeet liya!` 
+        });
+    });
+
+    // 3. WebRTC Voice Chat Signaling
+    socket.on('voiceSignal', ({ targetId, signalData }) => {
+        io.to(targetId).emit('voiceSignal', {
+            callerId: socket.id,
+            signalData: signalData
+        });
+    });
+    // ==========================
 
   // 1. CREATE ROOM
   socket.on('createRoom', ({ hostName, customNames }) => {
@@ -84,6 +112,7 @@ function startGame(roomId) {
     for (let i = 0; i < 4; i++) {
       deck.push({ id: Math.random(), name });
     }
+
   });
 
   deck.sort(() => Math.random() - 0.5);
