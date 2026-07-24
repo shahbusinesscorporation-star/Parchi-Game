@@ -32,6 +32,24 @@
             position: relative;
         }
 
+        /* --- MUSIC TOGGLE BUTTON --- */
+        .music-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #2e1065;
+            border: 1px solid #a855f7;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            width: auto;
+            margin: 0;
+            box-shadow: 0 0 8px rgba(168, 85, 247, 0.4);
+            z-index: 10;
+        }
+
         /* --- GAMING LOGO HEADER --- */
         .game-logo {
             margin: -35px auto 15px auto;
@@ -173,7 +191,6 @@
         }
         .btn-join:active { transform: scale(0.98); }
 
-        /* --- CHAIN DIVIDER --- */
         .chain-divider {
             display: flex;
             align-items: center;
@@ -213,23 +230,16 @@
         .winner-details { background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 12px; padding: 12px; margin: 15px 0; color: #f1c40f; font-size: 16px; font-weight: bold; }
         .victory-btn { background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%); color: white; font-size: 18px; font-weight: 900; padding: 12px 30px; border-radius: 30px; border: 2px solid #fbbf24; cursor: pointer; width: auto; margin-top: 10px; }
 
-        /* --- FOOTER STATUS BAR --- */
-        .status-footer {
-            display: flex;
-            justify-content: space-between;
-            width: 100%;
-            max-width: 440px;
-            margin-top: 12px;
-            font-size: 11px;
-            color: #94a3b8;
-            padding: 0 5px;
-        }
+        .status-footer { display: flex; justify-content: space-between; width: 100%; max-width: 440px; margin-top: 12px; font-size: 11px; color: #94a3b8; padding: 0 5px; }
         .status-dot { display: inline-block; width: 8px; height: 8px; background-color: #22c55e; border-radius: 50%; margin-right: 4px; box-shadow: 0 0 6px #22c55e; }
     </style>
 </head>
 <body>
 
     <div class="container">
+        <!-- Sound Toggle Button -->
+        <button class="music-btn" id="musicBtn" onclick="toggleMusic()">🔊 Sound: ON</button>
+
         <!-- Gaming Logo -->
         <div class="game-logo">
             <h1>MULTIPLAYER</h1>
@@ -312,11 +322,54 @@
         </div>
     </div>
 
+    <!-- RELIABLE AUDIO DIRECT SOURCES -->
+    <audio id="bgMusic" loop preload="auto" src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=game-music-7408.mp3"></audio>
+    <audio id="clickSound" preload="auto" src="https://cdn.pixabay.com/download/audio/2022/03/24/audio_c8c8a73467.mp3?filename=click-button-140881.mp3"></audio>
+    <audio id="winSound" preload="auto" src="https://cdn.pixabay.com/download/audio/2021/08/04/audio_bb630cc098.mp3?filename=success-fanfare-trumpets-6185.mp3"></audio>
+
     <script>
         const socket = io();
         let myRoomId = '', myUsername = '', myCards = [], selectedIndex = -1, isMyTurn = false;
+        let isMuted = false;
+        let audioStarted = false;
+
+        const bgMusic = document.getElementById('bgMusic');
+        const clickSound = document.getElementById('clickSound');
+        const winSound = document.getElementById('winSound');
+
+        // Unlock browser audio context on any first touch/click
+        function enableAudio() {
+            if (!audioStarted && !isMuted) {
+                bgMusic.play().then(() => {
+                    audioStarted = true;
+                }).catch(() => {});
+            }
+        }
+        document.body.addEventListener('click', enableAudio, { once: true });
+        document.body.addEventListener('touchstart', enableAudio, { once: true });
+
+        function playSound(sound) {
+            if (!isMuted && sound) {
+                sound.currentTime = 0;
+                sound.play().catch(() => {});
+            }
+        }
+
+        function toggleMusic() {
+            isMuted = !isMuted;
+            const musicBtn = document.getElementById('musicBtn');
+            if (isMuted) {
+                bgMusic.pause();
+                musicBtn.innerText = '🔇 Sound: OFF';
+            } else {
+                bgMusic.play().catch(() => {});
+                musicBtn.innerText = '🔊 Sound: ON';
+            }
+        }
 
         function createRoom() {
+            playSound(clickSound);
+            enableAudio();
             myUsername = document.getElementById('usernameInput').value.trim();
             if (!myUsername) return alert('Apna Name likhein!');
 
@@ -326,14 +379,12 @@
             const p4 = document.getElementById('p4').value.trim() || 'Grapes';
 
             myRoomId = Math.floor(100000 + Math.random() * 900000).toString();
-            socket.emit('createRoom', { 
-                roomId: myRoomId, 
-                username: myUsername, 
-                parchis: [p1, p2, p3, p4] 
-            });
+            socket.emit('createRoom', { roomId: myRoomId, username: myUsername, parchis: [p1, p2, p3, p4] });
         }
 
         function joinRoom() {
+            playSound(clickSound);
+            enableAudio();
             myUsername = document.getElementById('joinUsernameInput').value.trim();
             myRoomId = document.getElementById('roomCodeInput').value.trim();
             if (!myUsername || !myRoomId) return alert('Name aur Room Code bharein!');
@@ -341,16 +392,19 @@
         }
 
         function startGame() {
+            playSound(clickSound);
             socket.emit('startGame', { roomId: myRoomId });
         }
 
         function markReady() {
+            playSound(clickSound);
             socket.emit('playerReady', { roomId: myRoomId });
             document.getElementById('readyBtn').style.display = 'none';
         }
 
         function selectCard(idx) {
             if (!isMyTurn) return alert('Abhi aapki turn nahi hai!');
+            playSound(clickSound);
             selectedIndex = idx;
             renderCards();
             document.getElementById('passBtn').style.display = 'inline-block';
@@ -358,6 +412,7 @@
 
         function passSelectedCard() {
             if (selectedIndex === -1) return alert('Parchi select karein!');
+            playSound(clickSound);
             socket.emit('passCard', { roomId: myRoomId, cardIndex: selectedIndex });
             selectedIndex = -1;
             document.getElementById('passBtn').style.display = 'none';
@@ -412,11 +467,13 @@
         }
 
         function showWinnerModal(message) {
+            playSound(winSound);
             document.getElementById('modalWinnerText').innerText = message;
             document.getElementById('winnerModal').style.display = 'flex';
         }
 
         function closeWinnerModal() {
+            playSound(clickSound);
             document.getElementById('winnerModal').style.display = 'none';
         }
 
@@ -428,9 +485,7 @@
             document.getElementById('setupScreen').style.display = 'none';
             document.getElementById('gameScreen').style.display = 'block';
             document.getElementById('roomDisplay').innerText = `Room Code: ${roomId}`;
-            
             renderPlayersList(players);
-
             if (players.length >= 2) document.getElementById('startBtn').style.display = 'inline-block';
         }
 
