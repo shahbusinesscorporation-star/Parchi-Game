@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Multiplayer Parchi Game</title>
     <script src="/socket.io/socket.io.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/simple-peer/9.11.1/simplepeer.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Montserrat:wght@600;800&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; font-family: 'Montserrat', sans-serif; }
@@ -33,31 +32,40 @@
             position: relative;
         }
 
-        /* --- CONTROL BUTTONS TOP CORNER --- */
+        /* --- CONTROL BUTTON & VOLUME CONTROLLER TOP CORNER --- */
         .controls-corner {
             position: absolute;
             top: 12px;
             right: 12px;
             display: flex;
+            align-items: center;
             gap: 6px;
+            background: rgba(28, 8, 54, 0.9);
+            border: 1px solid #a855f7;
+            padding: 4px 8px;
+            border-radius: 15px;
+            box-shadow: 0 0 8px rgba(168, 85, 247, 0.3);
             z-index: 20;
         }
 
-        .music-btn, .mic-btn {
-            background: linear-gradient(180deg, #2e1065 0%, #1c0836 100%);
-            border: 1px solid #a855f7;
+        .music-btn {
+            background: transparent;
+            border: none;
             color: #e9d5ff;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 10px;
+            font-size: 11px;
             font-weight: 700;
             cursor: pointer;
-            width: auto;
+            padding: 0;
             margin: 0;
-            box-shadow: 0 0 8px rgba(168, 85, 247, 0.3);
-            white-space: nowrap;
+            outline: none;
         }
-        .mic-btn.active { border-color: #22c55e; color: #4ade80; box-shadow: 0 0 10px rgba(34, 197, 94, 0.5); }
+
+        .volume-slider {
+            width: 55px;
+            height: 4px;
+            accent-color: #a855f7;
+            cursor: pointer;
+        }
 
         /* --- GAMING LOGO HEADER --- */
         .game-logo {
@@ -202,10 +210,10 @@
 <body>
 
     <div class="container">
-        <!-- Top Right Controls -->
+        <!-- Top Right BGM Volume Control -->
         <div class="controls-corner">
-            <button class="mic-btn" id="micBtn" onclick="toggleMic()">🎙️ MIC: OFF</button>
-            <button class="music-btn" id="musicBtn" onclick="toggleMusic()">🔊 ON</button>
+            <button class="music-btn" id="musicBtn" onclick="toggleMusic()">🎵</button>
+            <input type="range" id="bgmVolume" class="volume-slider" min="0" max="1" step="0.05" value="0.5" oninput="changeBGMVolume(this.value)">
         </div>
 
         <!-- Gaming Logo -->
@@ -283,9 +291,6 @@
         </div>
     </div>
 
-    <!-- Container for incoming audio elements -->
-    <div id="audioContainer"></div>
-
     <!-- Footer Status -->
     <div class="status-footer">
         <div><span class="status-dot"></span>Connected</div>
@@ -310,12 +315,14 @@
     <script>
         const socket = io();
         let myRoomId = '', myUsername = '', myCards = [], selectedIndex = -1, isMyTurn = false;
-        let isMuted = false, audioStarted = false, isMicOn = false;
-        let localStream = null, peers = {};
+        let isMuted = false, audioStarted = false, lastVolume = 0.5;
 
         const bgMusic = document.getElementById('bgMusic');
         const clickSound = document.getElementById('clickSound');
         const winSound = document.getElementById('winSound');
+
+        // Set default volume
+        bgMusic.volume = 0.5;
 
         function enableAudio() {
             if (!audioStarted && !isMuted) {
@@ -328,106 +335,39 @@
             if (!isMuted && sound) { sound.currentTime = 0; sound.play().catch(() => {}); }
         }
 
-        function toggleMusic() {
-            isMuted = !isMuted;
+        // BGM Volume Slider Control Function
+        function changeBGMVolume(val) {
+            bgMusic.volume = val;
             const musicBtn = document.getElementById('musicBtn');
-            if (isMuted) {
-                bgMusic.pause();
-                musicBtn.innerText = '🔇 OFF';
+            if (val == 0) {
+                isMuted = true;
+                musicBtn.innerText = '🔇';
             } else {
+                isMuted = false;
+                musicBtn.innerText = '🎵';
+                if (bgMusic.paused && audioStarted) bgMusic.play().catch(() => {});
+            }
+        }
+
+        // Quick Mute / Unmute Button
+        function toggleMusic() {
+            const musicBtn = document.getElementById('musicBtn');
+            const slider = document.getElementById('bgmVolume');
+
+            if (!isMuted) {
+                lastVolume = bgMusic.volume > 0 ? bgMusic.volume : 0.5;
+                bgMusic.volume = 0;
+                slider.value = 0;
+                isMuted = true;
+                musicBtn.innerText = '🔇';
+            } else {
+                bgMusic.volume = lastVolume;
+                slider.value = lastVolume;
+                isMuted = false;
+                musicBtn.innerText = '🎵';
                 bgMusic.play().catch(() => {});
-                musicBtn.innerText = '🔊 ON';
             }
         }
-
-        // --- FULL WEBRTC VOICE CHAT ENGINE ---
-        async function toggleMic() {
-            const micBtn = document.getElementById('micBtn');
-            if (!isMicOn) {
-                try {
-                    localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-                    isMicOn = true;
-                    micBtn.innerText = '🎙️ MIC: ON';
-                    micBtn.classList.add('active');
-
-                    // Initiate peer connection to all connected players
-                    socket.emit('initiateVoice', { roomId: myRoomId });
-                } catch (err) {
-                    alert('Please allow Microphone permissions in your browser settings!');
-                }
-            } else {
-                if (localStream) {
-                    localStream.getTracks().forEach(track => track.stop());
-                }
-                isMicOn = false;
-                micBtn.innerText = '🎙️ MIC: OFF';
-                micBtn.classList.remove('active');
-            }
-        }
-
-        socket.on('userConnectedWebRTC', ({ socketId }) => {
-            if (localStream) {
-                createPeer(socketId, socket.id, localStream);
-            }
-        });
-
-        socket.on('webrtcSignal', ({ senderId, signal }) => {
-            if (!peers[senderId]) {
-                peers[senderId] = addPeer(signal, senderId, localStream);
-            } else {
-                peers[senderId].signal(signal);
-            }
-        });
-
-        function createPeer(userToSignal, callerID, stream) {
-            const peer = new SimplePeer({
-                initiator: true,
-                trickle: false,
-                stream: stream,
-                config: { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] }
-            });
-
-            peer.on("signal", signal => {
-                socket.emit("webrtcSignal", { targetId: userToSignal, signal });
-            });
-
-            peer.on("stream", stream => handleRemoteAudio(userToSignal, stream));
-            peers[userToSignal] = peer;
-        }
-
-        function addPeer(incomingSignal, callerID, stream) {
-            const peer = new SimplePeer({
-                initiator: false,
-                trickle: false,
-                stream: stream,
-                config: { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] }
-            });
-
-            peer.on("signal", signal => {
-                socket.emit("webrtcSignal", { targetId: callerID, signal });
-            });
-
-            peer.on("stream", stream => handleRemoteAudio(callerID, stream));
-            peer.signal(incomingSignal);
-            return peer;
-        }
-
-        function handleRemoteAudio(id, stream) {
-            let audio = document.getElementById(`audio-${id}`);
-            if (!audio) {
-                audio = document.createElement('audio');
-                audio.id = `audio-${id}`;
-                audio.autoplay = true;
-                document.getElementById('audioContainer').appendChild(audio);
-            }
-            audio.srcObject = stream;
-        }
-
-        socket.on('userDisconnectedWebRTC', ({ socketId }) => {
-            if (peers[socketId]) { peers[socketId].destroy(); delete peers[socketId]; }
-            const audio = document.getElementById(`audio-${socketId}`);
-            if (audio) audio.remove();
-        });
 
         // --- TEXT CHAT LOGIC ---
         function sendChatMessage() {
