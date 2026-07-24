@@ -116,27 +116,27 @@ io.on('connection', (socket) => {
             socket.emit('errorMsg', '❌ Jhootha THAP! Aapke paas 4 ek jaisi parchiyan nahi hain!');
         }
     });
-// Restart Game in Same Room Logic
-socket.on('restartGame', ({ roomId }) => {
-    const room = rooms[roomId];
-    if (!room || room.players.length < 2) return socket.emit('errorMsg', 'Atleast 2 players hone chahiye!');
 
-    room.gameStarted = true;
-    const deck = generateDeck(room.parchis, room.players.length);
+    // Restart Game in Same Room Logic
+    socket.on('restartGame', ({ roomId }) => {
+        const room = rooms[roomId];
+        if (!room || room.players.length < 2) return socket.emit('errorMsg', 'Atleast 2 players hone chahiye!');
 
-    // Reset every player's cards and send new ones
-    room.players.forEach((player) => {
-        player.cards = deck.splice(0, 4);
-        io.to(player.id).emit('yourCards', { cards: player.cards });
-    });
+        room.gameStarted = true;
+        const deck = generateDeck(room.parchis, room.players.length);
 
-    room.currentTurnIndex = 0;
-    const currentTurnPlayer = room.players[0];
-    
-    // Broadcast restart notification to everyone in room
-    io.to(roomId).emit('gameRestarted', {
-        activePlayer: currentTurnPlayer.username,
-        message: `🔄 Game Reload ho gaya! Pehli turn ${currentTurnPlayer.username} ki hai.`
+        room.players.forEach((player) => {
+            player.cards = deck.splice(0, 4);
+            io.to(player.id).emit('yourCards', { cards: player.cards });
+        });
+
+        room.currentTurnIndex = 0;
+        const currentTurnPlayer = room.players[0];
+
+        io.to(roomId).emit('gameRestarted', {
+            activePlayer: currentTurnPlayer.username,
+            message: `🔄 Game Reload ho gaya! Pehli turn ${currentTurnPlayer.username} ki hai.`
+        });
     });
 });
 
