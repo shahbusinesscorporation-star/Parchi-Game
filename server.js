@@ -5,9 +5,10 @@ const path = require('path');
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
+const io = new Server(server, {
+    cors: { origin: "*" }
+});
 
-// Static files (index.html etc.) serve karein
 app.use(express.static(__dirname));
 
 app.get('/', (req, res) => {
@@ -19,17 +20,39 @@ const rooms = {};
 io.on('connection', (socket) => {
     console.log('Player connected:', socket.id);
 
-    // 1. Join Room Notification
-    socket.on('joinRoomNotification', ({ roomId, username }) => {
+    // Create Room
+    socket.on('createRoom', ({ roomId, username }) => {
+        socket.join(roomId);
+        rooms[roomId] = [{ id: socket.id, username }];
+        socket.emit('roomCreated', { roomId, players: rooms[roomId] });
+    });
+
+    // Join Room
+    socket.on('joinRoom', ({ roomId, username }) => {
+        if (!rooms[roomId]) {
+            socket.emit('errorMsg', 'Room nahi mila! Code check karein.');
+            return;
+        }
+
+        if (rooms[roomId].length >= 4) {
+            socket.emit('errorMsg', 'Room full ho chuka hai (Max 4 Players)!');
+            return;
+        }
+
+        socket.join(roomId);
+        rooms[roomId].push({ id: socket.id, username });
+
+        // Update all players in this room
+        io.to(roomId).emit('playerJoined', { players: rooms[roomId] });
         socket.to(roomId).emit('notification', `${username} room me aagaye hain!`);
     });
 
-    // 2. Claim THAP Win
+    // Claim THAP Win
     socket.on('claimThapWin', ({ roomId, username }) => {
         io.to(roomId).emit('gameOver', { winner: username, message: `${username} ne THAP maarkar game jeet liya!` });
     });
 
-    // 3. WebRTC Voice Chat Signaling
+    // WebRTC Voice Chat
     socket.on('voiceSignal', (data) => {
         socket.to(data.roomId).emit('voiceSignal', data);
     });
