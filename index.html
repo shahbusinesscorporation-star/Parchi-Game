@@ -6,25 +6,101 @@
     <title>Multiplayer Parchi Game</title>
     <script src="/socket.io/socket.io.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; background-color: #1a252f; color: white; text-align: center; margin: 0; padding: 20px; }
-        .container { max-width: 500px; margin: 0 auto; background: #2c3e50; padding: 20px; border-radius: 12px; }
-        input, button { width: 80%; padding: 10px; margin: 6px 0; border-radius: 6px; border: none; font-size: 15px; box-sizing: border-box; }
-        button { background-color: #2ecc71; color: white; font-weight: bold; cursor: pointer; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #12092b; color: white; text-align: center; margin: 0; padding: 20px; }
+        .container { max-width: 500px; margin: 0 auto; background: #1e1145; padding: 20px; border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.5); border: 1px solid #3d2382; }
+        input, button { width: 80%; padding: 12px; margin: 6px 0; border-radius: 8px; border: none; font-size: 15px; box-sizing: border-box; }
+        button { background-color: #2ecc71; color: white; font-weight: bold; cursor: pointer; transition: transform 0.1s; }
+        button:active { transform: scale(0.98); }
         .parchi-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 10%; }
-        .parchi-inputs input { width: 100%; margin: 0; }
-        .turn-box { background: #f39c12; color: black; padding: 10px; font-weight: bold; border-radius: 6px; margin: 10px 0; }
+        .parchi-inputs input { width: 100%; margin: 0; background: #2c1a5e; color: white; border: 1px solid #5231a3; }
+        .turn-box { background: #f39c12; color: black; padding: 12px; font-weight: bold; border-radius: 8px; margin: 12px 0; }
         .cards-container { display: flex; justify-content: center; gap: 10px; margin: 20px 0; flex-wrap: wrap; }
-        .card { background: #e67e22; padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; border: 2px solid #d35400; min-width: 60px; }
-        .card.selected { border: 3px solid white; background: #d35400; transform: translateY(-5px); }
+        .card { background: #8e44ad; padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; border: 2px solid #9b59b6; min-width: 60px; box-shadow: 0 4px 8px rgba(0,0,0,0.3); }
+        .card.selected { border: 3px solid #ffffff; background: #6c5ce7; transform: translateY(-5px); }
         .thap-btn { background-color: #7f8c8d; font-size: 18px; padding: 15px; width: 100%; display: none; cursor: not-allowed; opacity: 0.6; }
         .thap-btn.active { background-color: #e74c3c; cursor: pointer; opacity: 1; animation: pulse 0.8s infinite; }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.04); } 100% { transform: scale(1); } }
         #gameScreen { display: none; }
         .player-list { list-style: none; padding: 0; text-align: left; }
-        .player-list li { background: #34495e; padding: 8px 12px; margin-bottom: 6px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; }
-        .status-tag { font-size: 12px; font-weight: bold; padding: 3px 8px; border-radius: 4px; }
+        .player-list li { background: #2c1a5e; padding: 10px 14px; margin-bottom: 6px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #3d2382; }
+        .status-tag { font-size: 12px; font-weight: bold; padding: 4px 10px; border-radius: 12px; }
         .status-ready { background-color: #2ecc71; color: white; }
         .status-waiting { background-color: #e67e22; color: white; }
+
+        /* --- VICTORY GAMING POPUP STYLES --- */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 5, 25, 0.85); justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(5px); }
+        
+        .victory-card { 
+            position: relative;
+            background: linear-gradient(180deg, #32105c 0%, #1a0836 100%);
+            border: 3px solid #a855f7;
+            border-radius: 20px;
+            padding: 30px 20px 20px 20px;
+            width: 85%;
+            max-width: 360px;
+            text-align: center;
+            box-shadow: 0 0 50px rgba(168, 85, 247, 0.4), inset 0 0 15px rgba(255, 255, 255, 0.1);
+            animation: victoryPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes victoryPop {
+            0% { transform: scale(0.3) rotate(-5deg); opacity: 0; }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+
+        .stars-row { font-size: 38px; margin-bottom: -10px; text-shadow: 0 0 15px #f1c40f; animation: bounceStars 1s infinite alternate; }
+        @keyframes bounceStars { from { transform: translateY(0); } to { transform: translateY(-6px); } }
+
+        .horns-decor { font-size: 28px; margin: 0 5px; }
+
+        .victory-banner {
+            background: linear-gradient(90deg, #ec4899, #8b5cf6, #ec4899);
+            background-size: 200% auto;
+            color: #ffffff;
+            font-size: 28px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            padding: 10px 0;
+            margin: 15px -25px;
+            text-transform: uppercase;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+            clip-path: polygon(5% 0%, 95% 0%, 100% 50%, 95% 100%, 5% 100%, 0% 50%);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);
+            animation: shine 2s linear infinite;
+        }
+
+        @keyframes shine { to { background-position: 200% center; } }
+
+        .winner-details {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 12px;
+            margin: 15px 0;
+            color: #f1c40f;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .victory-btn {
+            background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            font-size: 18px;
+            font-weight: 900;
+            padding: 12px 30px;
+            border-radius: 30px;
+            border: 2px solid #fbbf24;
+            box-shadow: 0 6px 0 #92400e, 0 10px 20px rgba(0,0,0,0.4);
+            cursor: pointer;
+            width: auto;
+            text-transform: uppercase;
+            margin-top: 10px;
+        }
+
+        .victory-btn:active {
+            box-shadow: 0 2px 0 #92400e;
+            transform: translateY(4px);
+        }
     </style>
 </head>
 <body>
@@ -47,7 +123,7 @@
 
             <button onclick="createRoom()">Create Room</button>
 
-            <hr style="border: 0.5px solid #7f8c8d; margin: 20px 0;">
+            <hr style="border: 0.5px solid #3d2382; margin: 20px 0;">
 
             <h3>2. Join Room</h3>
             <input type="text" id="joinUsernameInput" placeholder="Apna Name Likhein">
@@ -76,6 +152,21 @@
 
             <!-- THAP Button -->
             <button id="thapBtn" class="thap-btn" onclick="claimThap()">✋ THAP! (LOCKED)</button>
+        </div>
+    </div>
+
+    <!-- Victory Gaming Modal -->
+    <div id="winnerModal" class="modal-overlay">
+        <div class="victory-card">
+            <div class="stars-row">
+                <span class="horns-decor">🎺</span>⭐ ⭐ ⭐<span class="horns-decor">🎺</span>
+            </div>
+            
+            <div class="victory-banner">VICTORY</div>
+
+            <div id="modalWinnerText" class="winner-details"></div>
+
+            <button class="victory-btn" onclick="closeWinnerModal()">CONTINUE</button>
         </div>
     </div>
 
@@ -178,6 +269,15 @@
             document.getElementById('playerCount').innerText = players.length;
         }
 
+        function showWinnerModal(message) {
+            document.getElementById('modalWinnerText').innerText = message;
+            document.getElementById('winnerModal').style.display = 'flex';
+        }
+
+        function closeWinnerModal() {
+            document.getElementById('winnerModal').style.display = 'none';
+        }
+
         // Socket Events
         socket.on('roomCreated', (data) => setupGameUI(data.roomId, data.players));
         socket.on('playerJoined', (data) => setupGameUI(myRoomId, data.players));
@@ -198,6 +298,7 @@
             document.getElementById('readyBtn').style.display = 'none';
             document.getElementById('cardsArea').style.display = 'block';
             document.getElementById('thapBtn').style.display = 'block';
+            closeWinnerModal();
             renderCards();
         });
 
@@ -214,13 +315,11 @@
             document.getElementById('turnBanner').style.display = 'none';
             document.getElementById('thapBtn').style.display = 'none';
 
-            // Show Get Ready Button for Next Game
             const readyBtn = document.getElementById('readyBtn');
             readyBtn.style.display = 'inline-block';
 
             renderPlayersList(data.players);
-
-            alert(`🏆 GAME OVER 🏆\n\n${data.message}`);
+            showWinnerModal(data.message);
         });
 
         socket.on('readyStatusUpdate', (data) => {
@@ -228,6 +327,7 @@
         });
 
         socket.on('gameRestarted', (data) => {
+            closeWinnerModal();
             document.getElementById('readyBtn').style.display = 'none';
             document.getElementById('cardsArea').style.display = 'block';
             document.getElementById('thapBtn').style.display = 'block';
