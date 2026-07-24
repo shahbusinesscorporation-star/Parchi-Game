@@ -32,51 +32,60 @@
             position: relative;
         }
 
-        /* --- MUSIC TOGGLE BUTTON --- */
-        .music-btn {
+        /* --- CONTROL BUTTONS TOP CORNER --- */
+        .controls-corner {
             position: absolute;
             top: 12px;
             right: 12px;
-            background: #2e1065;
+            display: flex;
+            gap: 6px;
+            z-index: 20;
+        }
+
+        .music-btn, .mic-btn {
+            background: linear-gradient(180deg, #2e1065 0%, #1c0836 100%);
             border: 1px solid #a855f7;
-            color: white;
-            padding: 4px 9px;
+            color: #e9d5ff;
+            padding: 4px 8px;
             border-radius: 12px;
             font-size: 10px;
+            font-weight: 700;
             cursor: pointer;
             width: auto;
             margin: 0;
-            box-shadow: 0 0 8px rgba(168, 85, 247, 0.4);
-            z-index: 10;
+            box-shadow: 0 0 8px rgba(168, 85, 247, 0.3);
+            white-space: nowrap;
         }
+        .mic-btn.active { border-color: #22c55e; color: #4ade80; box-shadow: 0 0 10px rgba(34, 197, 94, 0.5); }
 
         /* --- GAMING LOGO HEADER --- */
         .game-logo {
             margin: -35px auto 15px auto;
-            width: 220px;
+            width: 190px;
             background: linear-gradient(180deg, #3d1266 0%, #1c0836 100%);
             border: 3px solid #7b2cbf;
             border-radius: 18px;
-            padding: 10px 15px;
+            padding: 8px 12px;
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6), 0 0 15px rgba(157, 78, 221, 0.5);
             position: relative;
+            z-index: 5;
         }
         .game-logo::before {
             content: '🛡️';
-            font-size: 22px;
+            font-size: 20px;
             display: block;
             margin-bottom: -5px;
         }
         .game-logo h1 {
             font-family: 'Cinzel Decorative', serif;
-            font-size: 13px;
+            font-size: 11px;
             letter-spacing: 2px;
             color: #d8b4fe;
             margin: 0;
             text-shadow: 0 0 8px #9333ea;
         }
         .game-logo h2 {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 900;
             color: #fde047;
             margin: 2px 0 0 0;
@@ -84,161 +93,119 @@
             letter-spacing: 1px;
         }
 
-        /* --- METALLIC SECTION HEADERS --- */
         .section-header {
             background: linear-gradient(90deg, transparent 0%, #2e1065 20%, #4c1d95 50%, #2e1065 80%, transparent 100%);
             border-top: 2px solid #a855f7;
             border-bottom: 2px solid #a855f7;
             color: #fef08a;
             font-family: 'Cinzel Decorative', serif;
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 800;
-            padding: 6px 0;
-            margin: 15px 0 12px 0;
+            padding: 5px 0;
+            margin: 12px 0 10px 0;
             letter-spacing: 1px;
-            text-shadow: 0 0 8px rgba(250, 204, 21, 0.6);
         }
 
-        .label-text {
-            font-size: 13px;
-            font-weight: 800;
-            color: #fef08a;
-            letter-spacing: 1px;
-            margin: 10px 0 8px 0;
-            text-shadow: 0 0 6px rgba(234, 179, 8, 0.4);
-        }
+        .label-text { font-size: 12px; font-weight: 800; color: #fef08a; margin: 8px 0 6px 0; }
 
-        /* --- INPUT FIELDS --- */
-        .neon-input-wrap {
-            position: relative;
-            margin-bottom: 12px;
-        }
-        .neon-input-wrap span {
-            position: absolute;
-            left: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 16px;
-            opacity: 0.7;
-        }
+        .neon-input-wrap { position: relative; margin-bottom: 10px; }
+        .neon-input-wrap span { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 14px; opacity: 0.7; }
         .input-glow {
             width: 100%;
-            padding: 12px 14px 12px 42px;
+            padding: 10px 12px 10px 40px;
             background: #0f061e;
             border: 2px solid #38bdf8;
             border-radius: 30px;
             color: #7dd3fc;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 700;
             outline: none;
-            box-shadow: 0 0 12px rgba(56, 189, 248, 0.3), inset 0 2px 5px rgba(0,0,0,0.8);
-            letter-spacing: 1px;
         }
-        .input-glow::placeholder { color: #38bdf8; opacity: 0.6; }
 
-        /* --- WOODEN PARCHI INPUTS --- */
-        .parchi-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 14px;
-        }
+        .parchi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
         .wooden-input {
             width: 100%;
-            padding: 10px 12px;
+            padding: 8px 10px;
             background: linear-gradient(180deg, #422006 0%, #1c0a00 100%);
             border: 2px solid #a16207;
-            border-radius: 12px;
+            border-radius: 10px;
             color: #86efac;
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 800;
             text-align: center;
             outline: none;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.6), inset 0 1px 2px rgba(255,255,255,0.2);
-            text-shadow: 0 0 6px rgba(134, 239, 172, 0.5);
         }
 
-        /* --- GLOSSY BUTTONS --- */
-        .btn-create {
-            width: 100%;
-            padding: 12px;
-            background: linear-gradient(180deg, #22c55e 0%, #15803d 100%);
-            border: 2px solid #86efac;
-            border-radius: 30px;
-            color: #ffffff;
-            font-size: 17px;
-            font-weight: 900;
-            cursor: pointer;
-            box-shadow: 0 0 15px rgba(34, 197, 94, 0.5), inset 0 2px 4px rgba(255,255,255,0.4);
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.6);
-            transition: transform 0.1s;
+        .btn-create, .btn-join {
+            width: 100%; padding: 10px; border-radius: 30px; color: #ffffff; font-size: 15px; font-weight: 900; cursor: pointer; border: none;
         }
-        .btn-create:active { transform: scale(0.98); }
+        .btn-create { background: linear-gradient(180deg, #22c55e 0%, #15803d 100%); border: 2px solid #86efac; }
+        .btn-join { background: linear-gradient(180deg, #0284c7 0%, #0369a1 100%); border: 2px solid #38bdf8; }
 
-        .btn-join {
-            width: 100%;
-            padding: 12px;
-            background: linear-gradient(180deg, #0284c7 0%, #0369a1 100%);
-            border: 2px solid #38bdf8;
-            border-radius: 30px;
-            color: #ffffff;
-            font-size: 17px;
-            font-weight: 900;
-            cursor: pointer;
-            box-shadow: 0 0 15px rgba(2, 132, 199, 0.5), inset 0 2px 4px rgba(255,255,255,0.4);
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.6);
-            transition: transform 0.1s;
-        }
-        .btn-join:active { transform: scale(0.98); }
+        .chain-divider { display: flex; align-items: center; justify-content: center; margin: 12px 0; color: #a855f7; font-size: 12px; opacity: 0.6; }
+        .chain-divider::before, .chain-divider::after { content: ''; flex: 1; border-bottom: 2px dashed #6b21a8; margin: 0 10px; }
 
-        .chain-divider {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 15px 0;
-            color: #a855f7;
-            font-size: 14px;
-            opacity: 0.6;
-        }
-        .chain-divider::before, .chain-divider::after {
-            content: '';
-            flex: 1;
-            border-bottom: 2px dashed #6b21a8;
-            margin: 0 10px;
-        }
-
-        /* --- GAMEPLAY UI STYLES --- */
-        .turn-box { background: #f39c12; color: black; padding: 12px; font-weight: bold; border-radius: 8px; margin: 12px 0; }
-        .cards-container { display: flex; justify-content: center; gap: 10px; margin: 20px 0; flex-wrap: wrap; }
-        .card { background: #8e44ad; padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; border: 2px solid #9b59b6; min-width: 60px; box-shadow: 0 4px 8px rgba(0,0,0,0.3); }
-        .card.selected { border: 3px solid #ffffff; background: #6c5ce7; transform: translateY(-5px); }
-        .thap-btn { background-color: #7f8c8d; font-size: 18px; padding: 15px; width: 100%; display: none; cursor: not-allowed; opacity: 0.6; }
+        .turn-box { background: #f39c12; color: black; padding: 10px; font-weight: bold; border-radius: 8px; margin: 10px 0; font-size: 13px; }
+        .cards-container { display: flex; justify-content: center; gap: 8px; margin: 15px 0; flex-wrap: wrap; }
+        .card { background: #8e44ad; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; border: 2px solid #9b59b6; min-width: 55px; font-size: 13px; }
+        .card.selected { border: 3px solid #ffffff; background: #6c5ce7; transform: translateY(-4px); }
+        .thap-btn { background-color: #7f8c8d; font-size: 15px; padding: 12px; width: 100%; display: none; cursor: not-allowed; opacity: 0.6; border: none; border-radius: 10px; color: white; font-weight: bold; }
         .thap-btn.active { background-color: #e74c3c; cursor: pointer; opacity: 1; animation: pulse 0.8s infinite; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.04); } 100% { transform: scale(1); } }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.03); } 100% { transform: scale(1); } }
         #gameScreen { display: none; }
         .player-list { list-style: none; padding: 0; text-align: left; }
-        .player-list li { background: #1c0a38; padding: 10px 14px; margin-bottom: 6px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #3d2382; }
-        .status-tag { font-size: 12px; font-weight: bold; padding: 4px 10px; border-radius: 12px; }
+        .player-list li { background: #1c0a38; padding: 8px 12px; margin-bottom: 6px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #3d2382; font-size: 13px; }
+        .status-tag { font-size: 11px; font-weight: bold; padding: 3px 8px; border-radius: 10px; }
         .status-ready { background-color: #2ecc71; color: white; }
         .status-waiting { background-color: #e67e22; color: white; }
 
+        /* --- TEXT CHAT BOX --- */
+        .chat-container {
+            margin-top: 15px;
+            background: rgba(12, 5, 25, 0.95);
+            border: 1px solid #6b21a8;
+            border-radius: 12px;
+            padding: 10px;
+        }
+        .chat-messages {
+            height: 90px;
+            overflow-y: auto;
+            text-align: left;
+            font-size: 11px;
+            margin-bottom: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .chat-msg { background: rgba(255, 255, 255, 0.08); padding: 4px 8px; border-radius: 6px; word-break: break-word; }
+        .chat-input-wrap { display: flex; gap: 6px; }
+        .chat-input-wrap input {
+            flex: 1; padding: 6px 10px; background: #0f061e; border: 1px solid #38bdf8; border-radius: 15px; color: white; font-size: 11px; outline: none;
+        }
+        .chat-input-wrap button {
+            padding: 6px 12px; background: #8b5cf6; border: none; border-radius: 15px; color: white; font-weight: bold; font-size: 11px; cursor: pointer;
+        }
+
         /* --- VICTORY POPUP --- */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 5, 25, 0.85); justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(5px); }
-        .victory-card { position: relative; background: linear-gradient(180deg, #32105c 0%, #1a0836 100%); border: 3px solid #a855f7; border-radius: 20px; padding: 30px 20px 20px 20px; width: 85%; max-width: 360px; text-align: center; box-shadow: 0 0 50px rgba(168, 85, 247, 0.4); }
-        .stars-row { font-size: 38px; margin-bottom: -10px; text-shadow: 0 0 15px #f1c40f; }
-        .victory-banner { background: linear-gradient(90deg, #ec4899, #8b5cf6, #ec4899); color: #ffffff; font-size: 28px; font-weight: 900; letter-spacing: 2px; padding: 10px 0; margin: 15px -25px; text-transform: uppercase; box-shadow: 0 5px 15px rgba(0,0,0,0.4); clip-path: polygon(5% 0%, 95% 0%, 100% 50%, 95% 100%, 5% 100%, 0% 50%); }
-        .winner-details { background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 12px; padding: 12px; margin: 15px 0; color: #f1c40f; font-size: 16px; font-weight: bold; }
-        .victory-btn { background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%); color: white; font-size: 18px; font-weight: 900; padding: 12px 30px; border-radius: 30px; border: 2px solid #fbbf24; cursor: pointer; width: auto; margin-top: 10px; }
+        .victory-card { position: relative; background: linear-gradient(180deg, #32105c 0%, #1a0836 100%); border: 3px solid #a855f7; border-radius: 20px; padding: 25px 15px 15px 15px; width: 85%; max-width: 340px; text-align: center; }
+        .stars-row { font-size: 30px; margin-bottom: -5px; }
+        .victory-banner { background: linear-gradient(90deg, #ec4899, #8b5cf6, #ec4899); color: #ffffff; font-size: 24px; font-weight: 900; padding: 8px 0; margin: 10px -20px; text-transform: uppercase; }
+        .winner-details { background: rgba(255, 255, 255, 0.08); border-radius: 10px; padding: 10px; margin: 12px 0; color: #f1c40f; font-size: 14px; font-weight: bold; }
+        .victory-btn { background: #f59e0b; color: white; font-size: 16px; font-weight: 900; padding: 10px 25px; border-radius: 20px; border: none; cursor: pointer; }
 
-        .status-footer { display: flex; justify-content: space-between; width: 100%; max-width: 440px; margin-top: 12px; font-size: 11px; color: #94a3b8; padding: 0 5px; }
-        .status-dot { display: inline-block; width: 8px; height: 8px; background-color: #22c55e; border-radius: 50%; margin-right: 4px; box-shadow: 0 0 6px #22c55e; }
+        .status-footer { display: flex; justify-content: space-between; width: 100%; max-width: 440px; margin-top: 10px; font-size: 10px; color: #94a3b8; }
+        .status-dot { display: inline-block; width: 6px; height: 6px; background-color: #22c55e; border-radius: 50%; margin-right: 4px; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <!-- Sound Toggle Button -->
-        <button class="music-btn" id="musicBtn" onclick="toggleMusic()">🔊 ON</button>
+        <!-- Top Right Controls -->
+        <div class="controls-corner">
+            <button class="mic-btn" id="micBtn" onclick="toggleMic()">🎙️ MIC: OFF</button>
+            <button class="music-btn" id="musicBtn" onclick="toggleMusic()">🔊 ON</button>
+        </div>
 
         <!-- Gaming Logo -->
         <div class="game-logo">
@@ -255,12 +222,12 @@
                 <input type="text" id="usernameInput" class="input-glow" placeholder="TYPE YOUR NAME">
             </div>
             
-            <div class="label-text">4 TYPE PARCHI NAMES:</div>
+            <div class="label-text">4 PARCHI NAMES:</div>
             <div class="parchi-grid">
-                <input type="text" id="p1" class="wooden-input" value="Apple" placeholder="Parchi 1">
-                <input type="text" id="p2" class="wooden-input" value="Banana" placeholder="Parchi 2">
-                <input type="text" id="p3" class="wooden-input" value="Mango" placeholder="Parchi 3">
-                <input type="text" id="p4" class="wooden-input" value="Grapes" placeholder="Parchi 4">
+                <input type="text" id="p1" class="wooden-input" value="Apple">
+                <input type="text" id="p2" class="wooden-input" value="Banana">
+                <input type="text" id="p3" class="wooden-input" value="Mango">
+                <input type="text" id="p4" class="wooden-input" value="Grapes">
             </div>
 
             <button class="btn-create" onclick="createRoom()">Create Room</button>
@@ -284,25 +251,34 @@
 
         <!-- Game Screen -->
         <div id="gameScreen">
-            <h3 id="roomDisplay" style="color: #f1c40f;"></h3>
-            <h4>Players (<span id="playerCount">0</span>):</h4>
+            <h3 id="roomDisplay" style="color: #f1c40f; margin: 5px 0;"></h3>
+            <h4 style="margin: 5px 0;">Players (<span id="playerCount">0</span>):</h4>
             <ul id="playersList" class="player-list"></ul>
 
-            <button id="startBtn" onclick="startGame()" style="background-color: #f39c12; display:none;">🎮 Start Game</button>
-            <button id="readyBtn" onclick="markReady()" style="background-color: #2ecc71; display:none;">✋ Get Ready</button>
+            <button id="startBtn" onclick="startGame()" style="background-color: #f39c12; width: 100%; padding: 10px; border: none; border-radius: 20px; color: white; font-weight: bold; cursor: pointer; display:none;">🎮 Start Game</button>
+            <button id="readyBtn" onclick="markReady()" style="background-color: #2ecc71; width: 100%; padding: 10px; border: none; border-radius: 20px; color: white; font-weight: bold; cursor: pointer; display:none;">✋ Get Ready</button>
 
             <!-- Turn Banner -->
             <div id="turnBanner" class="turn-box" style="display:none;"></div>
 
             <!-- Cards Area -->
             <div id="cardsArea" style="display:none;">
-                <h4>🎴 Aapki Parchiyan:</h4>
+                <h4 style="margin: 5px 0;">🎴 Aapki Parchiyan:</h4>
                 <div id="myCards" class="cards-container"></div>
-                <button id="passBtn" onclick="passSelectedCard()" style="background-color: #e67e22; display:none;">➡️ Parchi Pass Karein</button>
+                <button id="passBtn" onclick="passSelectedCard()" style="background-color: #e67e22; border: none; padding: 10px 20px; border-radius: 20px; color: white; font-weight: bold; cursor: pointer; display:none;">➡️ Parchi Pass Karein</button>
             </div>
 
             <!-- THAP Button -->
             <button id="thapBtn" class="thap-btn" onclick="claimThap()">✋ THAP! (LOCKED)</button>
+
+            <!-- Text Chat Box -->
+            <div class="chat-container">
+                <div id="chatMessages" class="chat-messages"></div>
+                <div class="chat-input-wrap">
+                    <input type="text" id="chatInput" placeholder="Message likhein..." onkeypress="handleChatKeyPress(event)">
+                    <button onclick="sendChatMessage()">Send 📤</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -322,7 +298,7 @@
         </div>
     </div>
 
-    <!-- RELIABLE AUDIO DIRECT SOURCES -->
+    <!-- AUDIO SOURCES -->
     <audio id="bgMusic" loop preload="auto" src="mixkit-beautiful-dream-493.mp3"></audio>
     <audio id="clickSound" preload="auto" src="https://cdn.pixabay.com/download/audio/2022/03/24/audio_c8c8a73467.mp3?filename=click-button-140881.mp3"></audio>
     <audio id="winSound" preload="auto" src="https://cdn.pixabay.com/download/audio/2021/08/04/audio_bb630cc098.mp3?filename=success-fanfare-trumpets-6185.mp3"></audio>
@@ -330,29 +306,22 @@
     <script>
         const socket = io();
         let myRoomId = '', myUsername = '', myCards = [], selectedIndex = -1, isMyTurn = false;
-        let isMuted = false;
-        let audioStarted = false;
+        let isMuted = false, audioStarted = false, isMicOn = false;
+        let localStream = null, peers = {};
 
         const bgMusic = document.getElementById('bgMusic');
         const clickSound = document.getElementById('clickSound');
         const winSound = document.getElementById('winSound');
 
-        // Unlock browser audio context on any first touch/click
         function enableAudio() {
             if (!audioStarted && !isMuted) {
-                bgMusic.play().then(() => {
-                    audioStarted = true;
-                }).catch(() => {});
+                bgMusic.play().then(() => audioStarted = true).catch(() => {});
             }
         }
         document.body.addEventListener('click', enableAudio, { once: true });
-        document.body.addEventListener('touchstart', enableAudio, { once: true });
 
         function playSound(sound) {
-            if (!isMuted && sound) {
-                sound.currentTime = 0;
-                sound.play().catch(() => {});
-            }
+            if (!isMuted && sound) { sound.currentTime = 0; sound.play().catch(() => {}); }
         }
 
         function toggleMusic() {
@@ -360,19 +329,61 @@
             const musicBtn = document.getElementById('musicBtn');
             if (isMuted) {
                 bgMusic.pause();
-                musicBtn.innerText = '🔇OFF';
+                musicBtn.innerText = '🔇 OFF';
             } else {
                 bgMusic.play().catch(() => {});
                 musicBtn.innerText = '🔊 ON';
             }
         }
 
+        // --- VOICE CHAT (MIC) LOGIC ---
+        async function toggleMic() {
+            const micBtn = document.getElementById('micBtn');
+            if (!isMicOn) {
+                try {
+                    localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    isMicOn = true;
+                    micBtn.innerText = '🎙️ MIC: ON';
+                    micBtn.classList.add('active');
+                } catch (err) {
+                    alert('Microphone access allow karein!');
+                }
+            } else {
+                if (localStream) {
+                    localStream.getTracks().forEach(track => track.stop());
+                }
+                isMicOn = false;
+                micBtn.innerText = '🎙️ MIC: OFF';
+                micBtn.classList.remove('active');
+            }
+        }
+
+        // --- TEXT CHAT LOGIC ---
+        function sendChatMessage() {
+            const input = document.getElementById('chatInput');
+            const msg = input.value.trim();
+            if (msg && myRoomId) {
+                socket.emit('sendChatMessage', { roomId: myRoomId, username: myUsername, message: msg });
+                input.value = '';
+            }
+        }
+
+        function handleChatKeyPress(e) { if (e.key === 'Enter') sendChatMessage(); }
+
+        socket.on('receiveChatMessage', (data) => {
+            const box = document.getElementById('chatMessages');
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'chat-msg';
+            msgDiv.innerHTML = `<strong style="color:#fde047;">${data.username}:</strong> ${data.message}`;
+            box.appendChild(msgDiv);
+            box.scrollTop = box.scrollHeight;
+        });
+
+        // --- GAME ACTIONS ---
         function createRoom() {
-            playSound(clickSound);
-            enableAudio();
+            playSound(clickSound); enableAudio();
             myUsername = document.getElementById('usernameInput').value.trim();
             if (!myUsername) return alert('Apna Name likhein!');
-
             const p1 = document.getElementById('p1').value.trim() || 'Apple';
             const p2 = document.getElementById('p2').value.trim() || 'Banana';
             const p3 = document.getElementById('p3').value.trim() || 'Mango';
@@ -383,30 +394,19 @@
         }
 
         function joinRoom() {
-            playSound(clickSound);
-            enableAudio();
+            playSound(clickSound); enableAudio();
             myUsername = document.getElementById('joinUsernameInput').value.trim();
             myRoomId = document.getElementById('roomCodeInput').value.trim();
             if (!myUsername || !myRoomId) return alert('Name aur Room Code bharein!');
             socket.emit('joinRoom', { roomId: myRoomId, username: myUsername });
         }
 
-        function startGame() {
-            playSound(clickSound);
-            socket.emit('startGame', { roomId: myRoomId });
-        }
-
-        function markReady() {
-            playSound(clickSound);
-            socket.emit('playerReady', { roomId: myRoomId });
-            document.getElementById('readyBtn').style.display = 'none';
-        }
+        function startGame() { playSound(clickSound); socket.emit('startGame', { roomId: myRoomId }); }
+        function markReady() { playSound(clickSound); socket.emit('playerReady', { roomId: myRoomId }); document.getElementById('readyBtn').style.display = 'none'; }
 
         function selectCard(idx) {
             if (!isMyTurn) return alert('Abhi aapki turn nahi hai!');
-            playSound(clickSound);
-            selectedIndex = idx;
-            renderCards();
+            playSound(clickSound); selectedIndex = idx; renderCards();
             document.getElementById('passBtn').style.display = 'inline-block';
         }
 
@@ -418,9 +418,7 @@
             document.getElementById('passBtn').style.display = 'none';
         }
 
-        function claimThap() {
-            socket.emit('claimThapWin', { roomId: myRoomId, username: myUsername });
-        }
+        function claimThap() { socket.emit('claimThapWin', { roomId: myRoomId, username: myUsername }); }
 
         function renderCards() {
             const container = document.getElementById('myCards');
@@ -432,21 +430,19 @@
                 div.onclick = () => selectCard(idx);
                 container.appendChild(div);
             });
-
             checkThapLock();
         }
 
         function checkThapLock() {
             const thapBtn = document.getElementById('thapBtn');
             const hasFourSame = myCards.length === 4 && myCards.every(c => c === myCards[0]);
-
             if (hasFourSame) {
                 thapBtn.classList.add('active');
                 thapBtn.innerText = '✋ THAP! (CLICK TO WIN)';
                 thapBtn.disabled = false;
             } else {
                 thapBtn.classList.remove('active');
-                thapBtn.innerText = '✋ THAP! (LOCKED - 4 Same Parchiyan Chahiye)';
+                thapBtn.innerText = '✋ THAP! (LOCKED)';
                 thapBtn.disabled = true;
             }
         }
@@ -456,28 +452,17 @@
             list.innerHTML = '';
             players.forEach(p => {
                 const li = document.createElement('li');
-                const readyBadge = p.isReady 
-                    ? `<span class="status-tag status-ready">🟢 Ready</span>` 
-                    : `<span class="status-tag status-waiting">⏳ Waiting</span>`;
-                
+                const readyBadge = p.isReady ? `<span class="status-tag status-ready">🟢 Ready</span>` : `<span class="status-tag status-waiting">⏳ Waiting</span>`;
                 li.innerHTML = `<span>👤 ${p.username}</span> ${readyBadge}`;
                 list.appendChild(li);
             });
             document.getElementById('playerCount').innerText = players.length;
         }
 
-        function showWinnerModal(message) {
-            playSound(winSound);
-            document.getElementById('modalWinnerText').innerText = message;
-            document.getElementById('winnerModal').style.display = 'flex';
-        }
+        function showWinnerModal(message) { playSound(winSound); document.getElementById('modalWinnerText').innerText = message; document.getElementById('winnerModal').style.display = 'flex'; }
+        function closeWinnerModal() { playSound(clickSound); document.getElementById('winnerModal').style.display = 'none'; }
 
-        function closeWinnerModal() {
-            playSound(clickSound);
-            document.getElementById('winnerModal').style.display = 'none';
-        }
-
-        // Socket Events
+        // SOCKET EVENTS
         socket.on('roomCreated', (data) => setupGameUI(data.roomId, data.players));
         socket.on('playerJoined', (data) => setupGameUI(myRoomId, data.players));
 
@@ -495,15 +480,14 @@
             document.getElementById('readyBtn').style.display = 'none';
             document.getElementById('cardsArea').style.display = 'block';
             document.getElementById('thapBtn').style.display = 'block';
-            closeWinnerModal();
-            renderCards();
+            closeWinnerModal(); renderCards();
         });
 
         socket.on('turnUpdate', (data) => {
             isMyTurn = (data.activePlayer === myUsername);
             const banner = document.getElementById('turnBanner');
             banner.style.display = 'block';
-            banner.innerText = isMyTurn ? "👉 AAPKI TURN HAI! Ek parchi select karke pass karein." : `⏳ Turn: ${data.activePlayer} ki hai...`;
+            banner.innerText = isMyTurn ? "👉 AAPKI TURN HAI! Ek parchi pass karein." : `⏳ Turn: ${data.activePlayer} ki hai...`;
             if (!isMyTurn) document.getElementById('passBtn').style.display = 'none';
         });
 
@@ -511,30 +495,12 @@
             document.getElementById('cardsArea').style.display = 'none';
             document.getElementById('turnBanner').style.display = 'none';
             document.getElementById('thapBtn').style.display = 'none';
-
-            const readyBtn = document.getElementById('readyBtn');
-            readyBtn.style.display = 'inline-block';
-
+            document.getElementById('readyBtn').style.display = 'inline-block';
             renderPlayersList(data.players);
             showWinnerModal(data.message);
         });
 
-        socket.on('readyStatusUpdate', (data) => {
-            renderPlayersList(data.players);
-        });
-
-        socket.on('gameRestarted', (data) => {
-            closeWinnerModal();
-            document.getElementById('readyBtn').style.display = 'none';
-            document.getElementById('cardsArea').style.display = 'block';
-            document.getElementById('thapBtn').style.display = 'block';
-            
-            isMyTurn = (data.activePlayer === myUsername);
-            const banner = document.getElementById('turnBanner');
-            banner.style.display = 'block';
-            banner.innerText = isMyTurn ? "👉 AAPKI TURN HAI! Ek parchi pass karein." : `⏳ Turn: ${data.activePlayer} ki hai...`;
-        });
-
+        socket.on('readyStatusUpdate', (data) => renderPlayersList(data.players));
         socket.on('errorMsg', (msg) => alert(msg));
     </script>
 </body>
