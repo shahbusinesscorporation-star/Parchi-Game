@@ -28,11 +28,11 @@ function generateDeck(parchiNames, playerCount) {
 }
 
 io.on('connection', (socket) => {
-    // Create Room with Custom Parchiyan
+    // Create Room
     socket.on('createRoom', ({ roomId, username, parchis }) => {
         socket.join(roomId);
         rooms[roomId] = {
-            players: [{ id: socket.id, username, cards: [] }],
+            players: [{ id: socket.id, username, cards: [], isReady: false }],
             parchis: parchis && parchis.length === 4 ? parchis : ['Raja', 'Mantri', 'Chor', 'Sipahi'],
             gameStarted: false,
             currentTurnIndex: 0
@@ -48,7 +48,7 @@ io.on('connection', (socket) => {
         if (room.players.length >= 4) return socket.emit('errorMsg', 'Room full hai!');
 
         socket.join(roomId);
-        room.players.push({ id: socket.id, username, cards: [] });
+        room.players.push({ id: socket.id, username, cards: [], isReady: false });
         io.to(roomId).emit('playerJoined', { players: room.players });
     });
 
@@ -62,6 +62,7 @@ io.on('connection', (socket) => {
 
         room.players.forEach((player) => {
             player.cards = deck.splice(0, 4);
+            player.isReady = false;
             io.to(player.id).emit('yourCards', { cards: player.cards });
         });
 
@@ -108,8 +109,15 @@ io.on('connection', (socket) => {
         const isWinValid = player.cards.length === 4 && player.cards.every(c => c === player.cards[0]);
 
         if (isWinValid) {
+            room.gameStarted = false;
+            room.players.forEach(p => {
+                p.cards = [];
+                p.isReady = false;
+            });
+
             io.to(roomId).emit('gameOver', { 
                 winner: username, 
+                players: room.players,
                 message: `🎉 BRAVO! ${username} ne 4 matching '${player.cards[0]}' parchiyan ikat-thi karke THAP maara aur JEET GAYA!` 
             });
         } else {
@@ -117,26 +125,38 @@ io.on('connection', (socket) => {
         }
     });
 
-    // Restart Game in Same Room Logic
-    socket.on('restartGame', ({ roomId }) => {
+    // Player Get Ready Event
+    socket.on('playerReady', ({ roomId }) => {
         const room = rooms[roomId];
-        if (!room || room.players.length < 2) return socket.emit('errorMsg', 'Atleast 2 players hone chahiye!');
+        if (!room) return;
 
-        room.gameStarted = true;
-        const deck = generateDeck(room.parchis, room.players.length);
+        const player = room.players.find(p => p.id === socket.id);
+        if (player) {
+            player.isReady = true;
+        }
 
-        room.players.forEach((player) => {
-            player.cards = deck.splice(0, 4);
-            io.to(player.id).emit('yourCards', { cards: player.cards });
-        });
+        io.to(roomId).emit('readyStatusUpdate', { players: room.players });
 
-        room.currentTurnIndex = 0;
-        const currentTurnPlayer = room.players[0];
+        // Check if ALL players are ready
+        const allReady = room.players.length >= 2 && room.players.every(p => p.isReady);
+        if (allReady) {
+            room.gameStarted = true;
+            const deck = generateDeck(room.parchis, room.players.length);
 
-        io.to(roomId).emit('gameRestarted', {
-            activePlayer: currentTurnPlayer.username,
-            message: `🔄 Game Reload ho gaya! Pehli turn ${currentTurnPlayer.username} ki hai.`
-        });
+            room.players.forEach((p) => {
+                p.cards = deck.splice(0, 4);
+                p.isReady = false;
+                io.to(p.id).emit('yourCards', { cards: p.cards });
+            });
+
+            room.currentTurnIndex = 0;
+            const currentTurnPlayer = room.players[0];
+
+            io.to(roomId).emit('gameRestarted', {
+                activePlayer: currentTurnPlayer.username,
+                message: `🔄 Sabhi ready ho gaye! Naya match shuru! Pehli turn ${currentTurnPlayer.username} ki hai.`
+            });
+        }
     });
 });
 
