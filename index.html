@@ -238,7 +238,7 @@
 
     <div class="container">
         <!-- Sound Toggle Button -->
-        <button class="music-btn" id="musicBtn" onclick="toggleMusic()">🔊 Sound: ON</button>
+        <button class="music-btn" id="musicBtn" onclick="toggleMusic()">🔊 ON</button>
 
         <!-- Gaming Logo -->
         <div class="game-logo">
@@ -360,10 +360,10 @@
             const musicBtn = document.getElementById('musicBtn');
             if (isMuted) {
                 bgMusic.pause();
-                musicBtn.innerText = '🔇 Sound: OFF';
+                musicBtn.innerText = '🔇OFF';
             } else {
                 bgMusic.play().catch(() => {});
-                musicBtn.innerText = '🔊 Sound: ON';
+                musicBtn.innerText = '🔊 ON';
             }
         }
 
