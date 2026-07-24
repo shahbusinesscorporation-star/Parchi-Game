@@ -1,192 +1,208 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Custom Parchi Game</title>
-  <script src="/socket.io/socket.io.js"></script>
-  <style>
-    body { font-family: Arial, sans-serif; text-align: center; background: #f0f2f5; padding: 20px; }
-    .card-box { display: inline-block; padding: 15px 25px; margin: 10px; background: white; border: 2px solid #333; border-radius: 8px; cursor: pointer; font-weight: bold; }
-    .hidden { display: none; }
-    .btn { padding: 10px 20px; background: #28a745; color: white; border: none; cursor: pointer; border-radius: 5px; margin-top: 10px; font-size: 16px; }
-    input { padding: 8px; margin: 5px; border-radius: 4px; border: 1px solid #ccc; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiplayer Parchi Game</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: #34495e;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0px 4px 10px rgba(0,0,0,0.3);
+        }
+        input, button {
+            width: 80%;
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 6px;
+            border: none;
+            font-size: 16px;
+        }
+        button {
+            background-color: #2ecc71;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #27ae60;
+        }
+        .thap-btn {
+            background-color: #e74c3c;
+            font-size: 20px;
+            padding: 15px;
+            display: none;
+        }
+        .thap-btn:hover {
+            background-color: #c0392b;
+        }
+        #gameScreen {
+            display: none;
+        }
+        .notification {
+            background: #f1c40f;
+            color: #2c3e50;
+            padding: 8px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            display: none;
+            font-weight: bold;
+        }
+        .player-list {
+            list-style: none;
+            padding: 0;
+            margin: 15px 0;
+            text-align: left;
+        }
+        .player-list li {
+            background: #1abc9c;
+            padding: 8px 12px;
+            margin-bottom: 5px;
+            border-radius: 4px;
+        }
+    </style>
 </head>
 <body>
 
-  <h1>📜 Multiplayer Parchi Game</h1>
-  <!-- Notification Box & THAP Button -->
-<div id="notification-box" style="display: none; position: fixed; top: 20px; right: 20px; background: #2ed573; color: white; padding: 12px 20px; border-radius: 8px; font-weight: bold; z-index: 1000;"></div>
+    <div class="container">
+        <h2>📜 Multiplayer Parchi Game</h2>
 
-<button id="thapBtn" onclick="triggerThapWin()" style="display: none; background: #ff4757; color: white; font-size: 22px; font-weight: bold; padding: 15px 35px; border: none; border-radius: 50px; cursor: pointer; box-shadow: 0 4px 15px rgba(255, 71, 87, 0.5); margin: 20px auto;">
-    🔥 THAP!
-</button>
+        <!-- Notification Box -->
+        <div id="notificationBox" class="notification"></div>
 
-  <div id="auth-screen">
-    <h2>1. Create Room</h2>
-    <input type="text" id="host-name" placeholder="Apna Name Likhein"><br><br>
-    <input type="text" class="custom-name" placeholder="Parchi 1 (e.g. Raja)">
-    <input type="text" class="custom-name" placeholder="Parchi 2 (e.g. Mantri)"><br>
-    <input type="text" class="custom-name" placeholder="Parchi 3 (e.g. Chor)">
-    <input type="text" class="custom-name" placeholder="Parchi 4 (e.g. Sipahi)"><br>
-    <button class="btn" onclick="createRoom()">Create Room</button>
+        <!-- Setup Screen -->
+        <div id="setupScreen">
+            <h3>1. Create Room</h3>
+            <input type="text" id="createUsername" placeholder="Apna Name Likhein">
+            <button onclick="createRoom()">Create Room</button>
 
-    <hr style="margin: 30px 0;">
+            <hr style="border: 0.5px solid #7f8c8d; margin: 20px 0;">
 
-    <h2>2. Join Room</h2>
-    <input type="text" id="player-name" placeholder="Apna Name Likhein"><br><br>
-    <input type="text" id="room-code-input" placeholder="Room Code Enter Karein"><br>
-    <button class="btn" style="background:#007bff;" onclick="joinRoom()">Join Game</button>
-  </div>
+            <h3>2. Join Room</h3>
+            <input type="text" id="joinUsername" placeholder="Apna Name Likhein">
+            <input type="text" id="joinRoomCode" placeholder="Room Code Enter Karein">
+            <button onclick="joinRoom()" style="background-color: #3498db;">Join Game</button>
+        </div>
 
-  <div id="game-screen" class="hidden">
-    <h2 id="room-display"></h2>
-    <h3 id="status-msg">Players Waiting...</h3>
-    <ul id="players-list" style="list-style: none; padding: 0;"></ul>
+        <!-- Game Screen -->
+        <div id="gameScreen">
+            <h3 id="roomCodeDisplay" style="color: #f1c40f;">Room Code: </h3>
+            
+            <h4>Joined Players (<span id="playerCount">0</span>/4):</h4>
+            <ul id="playersList" class="player-list"></ul>
 
-    <div id="hand-container">
-      <h3>Aapki Parchiyan:</h3>
-      <div id="parchiyan-list"></div>
+            <button id="thapBtn" class="thap-btn" onclick="claimThap()">✋ THAP!</button>
+        </div>
     </div>
-  </div>
 
-  <script>
-    const socket = io();
-    let myRoomId = null;
+    <script>
+        // Automatic domain socket connection
+        const socket = io();
 
-    function createRoom() {
-      const hostName = document.getElementById('host-name').value;
-      const inputs = document.querySelectorAll('.custom-name');
-      const customNames = Array.from(inputs).map(i => i.value.trim()).filter(Boolean);
+        let currentRoomId = '';
+        let myUsername = '';
 
-      if (!hostName || customNames.length !== 4) {
-        alert("Apna naam aur 4 parchiyan zaroor bharein!");
-        return;
-      }
+        // Create Room
+        function createRoom() {
+            myUsername = document.getElementById('createUsername').value.trim();
+            if (!myUsername) {
+                alert('Kripya apna naam likhein!');
+                return;
+            }
 
-      socket.emit('createRoom', { hostName, customNames });
-    }
-
-    function joinRoom() {
-      const playerName = document.getElementById('player-name').value;
-      const roomId = document.getElementById('room-code-input').value.toUpperCase();
-
-      if (!playerName || !roomId) {
-        alert("Naam aur Room Code bharein!");
-        return;
-      }
-      // Double click / Multiple fires ko rokne ke liye button disable karo
-      event.target.disabled = true;
-
-      socket.emit('joinRoom', { playerName, roomId });
-    }
-
-    socket.on('roomCreated', ({ roomId, players }) => {
-      myRoomId = roomId;
-      showGameScreen(roomId, players);
-    });
-    // Purane dublicate triggers ko hatane ke liye
-    socket.off('updateplayers');
-    socket.off('gameStateUPdate');
-
-    socket.on('updatePlayers', (players) => {
-      updatePlayersUI(players);
-    });
-
-    socket.on('gameStateUpdate', (room) => {
-      myRoomId = room.roomId;
-      showGameScreen(room.roomId, room.players);
-
-      const me = room.players.find(p => p.id === socket.id);
-      const isMyTurn = room.players[room.currentTurnIndex].id === socket.id;
-
-      document.getElementById('status-msg').innerText = isMyTurn 
-        ? "🟢 Aapki Turn Hai! Parchi par click karke next player ko pass karein." 
-        : `⏳ Waiting for ${room.players[room.currentTurnIndex].name} to pass...`;
-
-      const parchiDiv = document.getElementById('parchiyan-list');
-      parchiDiv.innerHTML = '';
-
-      me.parchiyan.forEach((parchi, index) => {
-        const card = document.createElement('div');
-        card.className = 'card-box';
-        card.innerText = parchi.name;
-        
-        if (isMyTurn && me.parchiyan.length >= 4) {
-          card.onclick = () => socket.emit('passParchi', { roomId: myRoomId, parchiIndex: index });
-        } else {
-          card.style.opacity = '0.5';
-          card.style.cursor = 'not-allowed';
+            // Generate 6 Digit Code
+            currentRoomId = Math.floor(100000 + Math.random() * 900000).toString();
+            socket.emit('createRoom', { roomId: currentRoomId, username: myUsername });
         }
-        parchiDiv.appendChild(card);
-      });
-    });
 
-    socket.on('gameOver', ({ winnerName, parchiName }) => {
-      alert(`🎉 GAME OVER! ${winnerName} jeet gaya! Unke paas charo ${parchiName} ho gayi hain!`);
-    });
+        // Join Room
+        function joinRoom() {
+            myUsername = document.getElementById('joinUsername').value.trim();
+            currentRoomId = document.getElementById('joinRoomCode').value.trim();
 
-    socket.on('errorMsg', (msg) => alert(msg));
+            if (!myUsername || !currentRoomId) {
+                alert('Name aur Room Code dono bharein!');
+                return;
+            }
 
-    function showGameScreen(roomId, players) {
-      document.getElementById('auth-screen').classList.add('hidden');
-      document.getElementById('game-screen').classList.remove('hidden');
-      document.getElementById('room-display').innerText = `Room Code: ${roomId}`;
-      updatePlayersUI(players);
-    }
-
-    function updatePlayersUI(players) {
-      const list = document.getElementById('players-list');
-      list.innerHTML = players.map(p => `<li>👤 ${p.name} (${p.parchiyan.length} parchiyan)</li>`).join('');
-    }
-    // --- 1. Notification & Join Sound ---
-socket.on('notification', (msg) => {
-    const sound = document.getElementById('joinSound');
-    if (sound) sound.play().catch(() => {});
-    
-    const box = document.getElementById('notification-box');
-    if (box) {
-        box.innerText = msg;
-        box.style.display = 'block';
-        setTimeout(() => { box.style.display = 'none'; }, 3000);
-    }
-});
-
-// --- 2. 4 Cards Match & THAP Button Logic ---
-function checkMatchingCards(myCards) {
-    if (myCards && myCards.length === 4) {
-        const allEqual = myCards.every(card => card === myCards[0]);
-        const thapBtn = document.getElementById('thapBtn');
-        if (thapBtn) {
-            thapBtn.style.display = allEqual ? "block" : "none";
+            socket.emit('joinRoom', { roomId: currentRoomId, username: myUsername });
         }
-    }
-}
 
-function triggerThapWin() {
-    const currentRoomId = document.getElementById('room-display')?.innerText;
-    socket.emit('claimThapWin', { roomId: currentRoomId, username: "Player" });
-}
+        // THAP Action
+        function claimThap() {
+            socket.emit('claimThapWin', { roomId: currentRoomId, username: myUsername });
+        }
 
-socket.on('gameOver', ({ winner, message }) => {
-    const sound = document.getElementById('thapSound');
-    if (sound) sound.play().catch(() => {});
-    alert(`🎉 ${message}`);
-});
+        // Helper Notification Display
+        function showNotification(msg) {
+            const box = document.getElementById('notificationBox');
+            box.innerText = msg;
+            box.style.display = 'block';
+            setTimeout(() => { box.style.display = 'none'; }, 4000);
+        }
 
-// --- 3. WebRTC Voice Chat Setup ---
-navigator.mediaDevices?.getUserMedia({ audio: true, video: false })
-    .then(stream => {
-        socket.on('voiceSignal', (data) => {
-            // WebRTC Signaling handle karne ke liye
-            console.log("Voice signal received", data);
+        // --- Socket Event Handlers ---
+
+        socket.on('roomCreated', (data) => {
+            document.getElementById('setupScreen').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'block';
+            
+            const code = data.roomId || currentRoomId;
+            document.getElementById('roomCodeDisplay').innerText = `Room Code: ${code}`;
+            
+            updatePlayerList(data.players);
+            showNotification('Room ban gaya hai! Code share karein.');
         });
-    })
-    .catch(err => console.log("Mic access error or denied:", err));
-  </script>
-  <!-- WebRTC Remote Audio Container & Sound Effects -->
-<div id="remoteAudioContainer" style="display:none;"></div>
-<audio id="thapSound" src="sounds/thap_win.mp3" preload="auto"></audio>
-<audio id="joinSound" src="sounds/player_join.mp3" preload="auto"></audio>
+
+        socket.on('playerJoined', (data) => {
+            document.getElementById('setupScreen').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'block';
+
+            document.getElementById('roomCodeDisplay').innerText = `Room Code: ${currentRoomId}`;
+            updatePlayerList(data.players);
+        });
+
+        socket.on('notification', (msg) => {
+            showNotification(msg);
+        });
+
+        socket.on('errorMsg', (msg) => {
+            alert(msg);
+        });
+
+        socket.on('gameOver', (data) => {
+            alert(`🎉 Game Over!\n${data.message}`);
+        });
+
+        function updatePlayerList(players) {
+            const list = document.getElementById('playersList');
+            list.innerHTML = '';
+            if (players && players.length > 0) {
+                players.forEach(p => {
+                    const li = document.createElement('li');
+                    li.innerText = `👤 ${p.username}`;
+                    list.appendChild(li);
+                });
+                document.getElementById('playerCount').innerText = players.length;
+                
+                // Show THAP Button if 2 or more players join
+                if (players.length >= 2) {
+                    document.getElementById('thapBtn').style.display = 'inline-block';
+                }
+            }
+        }
+    </script>
 </body>
 </html>
