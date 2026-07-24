@@ -37,9 +37,6 @@ io.on('connection', (socket) => {
         socket.join(roomId);
 
         io.to(roomId).emit('playerJoined', { roomId, players: room.players });
-        
-        // Notify existing players about new WebRTC peer
-        socket.to(roomId).emit('userConnectedWebRTC', { socketId: socket.id, username });
     });
 
     // Start Game
@@ -102,7 +99,14 @@ io.on('connection', (socket) => {
         if (pCards && pCards.length === 4 && pCards.every(c => c === pCards[0])) {
             room.isGameStarted = false;
             room.players.forEach(p => p.isReady = false);
-            io.to(roomId).emit('gameOver', { winner: username, message: `🎉 ${username} ne THAP maarkar jeet liya!`, players: room.players });
+
+            const winningParchi = pCards[0]; // Winning parchi name extract kar liya
+
+            io.to(roomId).emit('gameOver', { 
+                winner: username, 
+                winningParchi: winningParchi, 
+                players: room.players 
+            });
         } else {
             socket.emit('errorMsg', 'Aapke paas 4 same parchiyan nahi hain!');
         }
@@ -123,14 +127,9 @@ io.on('connection', (socket) => {
         }
     });
 
-    // --- TEXT CHAT HANDLER ---
+    // Text Chat Handler
     socket.on('sendChatMessage', ({ roomId, username, message }) => {
         io.to(roomId).emit('receiveChatMessage', { username, message });
-    });
-
-    // --- WEBRTC VOICE CHAT SIGNALING ---
-    socket.on('webrtcSignal', ({ targetId, signal }) => {
-        io.to(targetId).emit('webrtcSignal', { senderId: socket.id, signal });
     });
 
     // Disconnect
@@ -142,7 +141,6 @@ io.on('connection', (socket) => {
             if (pIdx !== -1) {
                 room.players.splice(pIdx, 1);
                 io.to(rId).emit('playerJoined', { roomId: rId, players: room.players });
-                io.to(rId).emit('userDisconnectedWebRTC', { socketId: socket.id });
                 if (room.players.length === 0) delete rooms[rId];
                 break;
             }
