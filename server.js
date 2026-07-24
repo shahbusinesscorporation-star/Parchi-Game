@@ -17,7 +17,7 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Prevent Server Crash on Uncaught Exceptions
+// Crash Prevention
 process.on('uncaughtException', (err) => {
     console.error('Caught exception: ', err);
 });
@@ -119,7 +119,7 @@ io.on('connection', (socket) => {
         } catch (e) { console.error(e); }
     });
 
-    // Claim THAP Win
+    // Claim THAP Win (EXACT PARCHI NAME FIX)
     socket.on('claimThapWin', ({ roomId, username }) => {
         try {
             const room = rooms[roomId];
@@ -128,11 +128,13 @@ io.on('connection', (socket) => {
             const player = room.players.find(p => p.id === socket.id);
             if (!player || !player.cards || player.cards.length !== 4) return;
 
-            const parchiName = player.cards[0];
-            const isWinValid = player.cards.every(c => c === parchiName);
+            const winningParchi = player.cards[0]; // Winning Parchi Name
+            const isWinValid = player.cards.every(c => c === winningParchi);
 
             if (isWinValid) {
                 room.gameStarted = false;
+
+                // Reset cards after capturing winningParchi name
                 room.players.forEach(p => {
                     p.cards = [];
                     p.isReady = false;
@@ -140,9 +142,9 @@ io.on('connection', (socket) => {
 
                 io.to(roomId).emit('gameOver', { 
                     winner: username, 
-                    winningRole: parchiName,
+                    winningRole: winningParchi,
                     players: room.players,
-                    message: `BRAVO! ${username} ne 4 matching '${parchiName}' parchiyan ikat-thi karke THAP maara aur JEET GAYA!` 
+                    message: `BRAVO! ${username} ne 4 matching '${winningParchi}' parchiyan ikat-thi karke THAP maara aur JEET GAYA!` 
                 });
             } else {
                 socket.emit('errorMsg', '❌ Jhootha THAP! Aapke paas 4 ek jaisi parchiyan nahi hain!');
