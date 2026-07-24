@@ -195,12 +195,14 @@
             padding: 6px 12px; background: #8b5cf6; border: none; border-radius: 15px; color: white; font-weight: bold; font-size: 11px; cursor: pointer;
         }
 
-        /* --- VICTORY POPUP --- */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 5, 25, 0.85); justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(5px); }
+        /* --- POPUP MODAL (WIN / LOSE) --- */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 5, 25, 0.88); justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(5px); }
         .victory-card { position: relative; background: linear-gradient(180deg, #32105c 0%, #1a0836 100%); border: 3px solid #a855f7; border-radius: 20px; padding: 25px 15px 15px 15px; width: 85%; max-width: 340px; text-align: center; }
+        .victory-card.lose-card { border-color: #ef4444; background: linear-gradient(180deg, #450a0a 0%, #1a0836 100%); }
         .stars-row { font-size: 30px; margin-bottom: -5px; }
         .victory-banner { background: linear-gradient(90deg, #ec4899, #8b5cf6, #ec4899); color: #ffffff; font-size: 24px; font-weight: 900; padding: 8px 0; margin: 10px -20px; text-transform: uppercase; }
-        .winner-details { background: rgba(255, 255, 255, 0.08); border-radius: 10px; padding: 10px; margin: 12px 0; color: #f1c40f; font-size: 14px; font-weight: bold; }
+        .lose-banner { background: linear-gradient(90deg, #ef4444, #991b1b, #ef4444); color: #ffffff; font-size: 24px; font-weight: 900; padding: 8px 0; margin: 10px -20px; text-transform: uppercase; }
+        .winner-details { background: rgba(255, 255, 255, 0.08); border-radius: 10px; padding: 12px; margin: 12px 0; color: #f1c40f; font-size: 13px; font-weight: bold; line-height: 1.5; }
         .victory-btn { background: #f59e0b; color: white; font-size: 16px; font-weight: 900; padding: 10px 25px; border-radius: 20px; border: none; cursor: pointer; }
 
         .status-footer { display: flex; justify-content: space-between; width: 100%; max-width: 440px; margin-top: 10px; font-size: 10px; color: #94a3b8; }
@@ -297,11 +299,11 @@
         <div>Server Status: <span style="color:#22c55e; font-weight:bold;">Green 🟢</span></div>
     </div>
 
-    <!-- Victory Modal -->
+    <!-- Dynamic Popup Modal (Win / Lose) -->
     <div id="winnerModal" class="modal-overlay">
-        <div class="victory-card">
-            <div class="stars-row">🎺 ⭐ ⭐ ⭐ 🎺</div>
-            <div class="victory-banner">VICTORY</div>
+        <div id="modalCard" class="victory-card">
+            <div id="modalHeader" class="stars-row">🎺 ⭐ ⭐ ⭐ 🎺</div>
+            <div id="modalBanner" class="victory-banner">VICTORY</div>
             <div id="modalWinnerText" class="winner-details"></div>
             <button class="victory-btn" onclick="closeWinnerModal()">CONTINUE</button>
         </div>
@@ -321,7 +323,6 @@
         const clickSound = document.getElementById('clickSound');
         const winSound = document.getElementById('winSound');
 
-        // Set default volume
         bgMusic.volume = 0.5;
 
         function enableAudio() {
@@ -335,7 +336,6 @@
             if (!isMuted && sound) { sound.currentTime = 0; sound.play().catch(() => {}); }
         }
 
-        // BGM Volume Slider Control Function
         function changeBGMVolume(val) {
             bgMusic.volume = val;
             const musicBtn = document.getElementById('musicBtn');
@@ -349,7 +349,6 @@
             }
         }
 
-        // Quick Mute / Unmute Button
         function toggleMusic() {
             const musicBtn = document.getElementById('musicBtn');
             const slider = document.getElementById('bgmVolume');
@@ -470,7 +469,32 @@
             document.getElementById('playerCount').innerText = players.length;
         }
 
-        function showWinnerModal(message) { playSound(winSound); document.getElementById('modalWinnerText').innerText = message; document.getElementById('winnerModal').style.display = 'flex'; }
+        // --- WINNER / LOSER POPUP LOGIC ---
+        function showGameResultModal(winner, winningParchi) {
+            const isWinner = (winner === myUsername);
+            const modalCard = document.getElementById('modalCard');
+            const modalHeader = document.getElementById('modalHeader');
+            const modalBanner = document.getElementById('modalBanner');
+            const modalWinnerText = document.getElementById('modalWinnerText');
+
+            if (isWinner) {
+                playSound(winSound);
+                modalCard.classList.remove('lose-card');
+                modalHeader.innerText = '🎺 ⭐ ⭐ ⭐ 🎺';
+                modalBanner.className = 'victory-banner';
+                modalBanner.innerText = 'VICTORY';
+                modalWinnerText.innerHTML = `🎉 Badhai Ho! Aapne THAP maarkar jeet liya!<br><span style="color:#86efac;">Parchi: ${winningParchi} × 4</span>`;
+            } else {
+                modalCard.classList.add('lose-card');
+                modalHeader.innerText = '💔 😭 💔';
+                modalBanner.className = 'lose-banner';
+                modalBanner.innerText = 'YOU LOSE';
+                modalWinnerText.innerHTML = `👑 Winner: <span style="color:#fde047;">${winner}</span><br>📄 Winning Parchi: <span style="color:#86efac;">${winningParchi}</span>`;
+            }
+
+            document.getElementById('winnerModal').style.display = 'flex';
+        }
+
         function closeWinnerModal() { playSound(clickSound); document.getElementById('winnerModal').style.display = 'none'; }
 
         // SOCKET EVENTS
@@ -508,7 +532,7 @@
             document.getElementById('thapBtn').style.display = 'none';
             document.getElementById('readyBtn').style.display = 'inline-block';
             renderPlayersList(data.players);
-            showWinnerModal(data.message);
+            showGameResultModal(data.winner, data.winningParchi);
         });
 
         socket.on('readyStatusUpdate', (data) => renderPlayersList(data.players));
